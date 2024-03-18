@@ -1,5 +1,5 @@
 import { Organization } from "src/organization/entities/organization.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Contact {
@@ -15,6 +15,7 @@ export class Contact {
     @Column()
     email:string;
 
-    @OneToOne(()=>Organization)
-    organization_id:number;
+    @JoinColumn()
+    @ManyToOne(()=>Organization)
+    organization:Organization;
 }

@@ -4,22 +4,29 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contact } from './entities/contact.entity';
 import { Repository } from 'typeorm';
+import { OrganizationService } from 'src/organization/organization.service';
 
 @Injectable()
 export class ContactService {
   constructor(
     @InjectRepository(Contact)
-    private contactRepository: Repository<Contact>
+    private contactRepository: Repository<Contact>,
+    private organizationService: OrganizationService,
   ) { }
 
-  create(createContactDto: CreateContactDto) {
+  async create(createContactDto: CreateContactDto) {
     let contact = new Contact();
+    let organization = await this.organizationService.findOne(1);
     let {firstName, lastName, email} = createContactDto;
+
+    if (!organization) {
+      throw new NotFoundException("Organization doesn't exist");
+    }
     
     contact.firstName = firstName;
     contact.lastName  = lastName;
     contact.email = email;
-    contact.organization_id =1;
+    contact.organization =organization;
 
     return this.contactRepository.save(contact);
   }

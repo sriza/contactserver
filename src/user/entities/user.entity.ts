@@ -10,7 +10,7 @@ export class User {
     name:string;
 
     @Column()
-    password:string;
+    credential:string;
 
     @OneToOne(()=>Organization)
     organization_id:number;

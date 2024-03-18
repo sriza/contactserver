@@ -13,7 +13,7 @@ export class Contact {
     lastName:string;
 
     @Column()
-    email:number;
+    email:string;
 
     @OneToOne(()=>Organization)
     organization_id:number;

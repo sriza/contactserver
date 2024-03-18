@@ -23,6 +23,7 @@ import { Contact } from './contact/entities/contact.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [Organization, User, Contact],
+      synchronize: true
     }),
     UserModule,
     OrganizationModule,

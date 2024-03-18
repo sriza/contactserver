@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Contact } from './entities/contact.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ContactService {
+  constructor(
+    @InjectRepository(Contact)
+    private contactRepository: Repository<Contact>
+  ) { }
+
   create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
+    let contact = new Contact();
+    let {firstName, lastName, email} = createContactDto;
+    
+    contact.firstName = firstName;
+    contact.lastName  = lastName;
+    contact.email = email;
+    contact.organization_id =1;
+
+    return this.contactRepository.save(contact);
   }
 
   findAll() {
-    return `This action returns all contact`;
+    return this.contactRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} contact`;
+    return this.contactRepository.findOne({where:{id:id}});
   }
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
+  async update(id: number, updateContactDto: UpdateContactDto) {
+    let contact = await this.findOne(id);
+    let {firstName, lastName, email} = updateContactDto;
+
+    if(!contact){
+      throw new NotFoundException("Contact not found");
+    }
+
+    contact.firstName = firstName??contact.firstName;
+    contact.lastName = lastName??contact.lastName;
+    contact.email = email??contact.email;
+
+    return this.contactRepository.save(contact);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+  async remove(id: number) {
+    let contact = await this.findOne(id);
+
+    if(!contact){
+      throw new NotFoundException("Contact not found"); 
+    }
+
+    return await this.contactRepository.remove(contact);
   }
 }

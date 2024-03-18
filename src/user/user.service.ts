@@ -4,21 +4,28 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { OrganizationService } from 'src/organization/organization.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userRepository: Repository<User>,
+    private organizationService: OrganizationService
   ) { }
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     let user = new User();
-    let { name, credential } = createUserDto;
+    let { name, credential, organization } = createUserDto;
+    let organizationData = await this.organizationService.findBy(organization);
+
+    if (!organizationData) {
+      organizationData = await this.organizationService.create({"name":organization});
+    }
 
     user.name = name;
     user.credential = credential;
-    user.organization_id = 1;
+    user.organization = organizationData;
 
     return this.userRepository.save(user);
   }
@@ -48,7 +55,7 @@ export class UserService {
   async remove(id: number) {
     let user = await this.findOne(id);
 
-    if(!user){
+    if (!user) {
       throw new NotFoundException("User not found");
     }
 
